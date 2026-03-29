@@ -1,0 +1,5 @@
+{
+  "name": "CostePorKm",
+  "description": "Comparador de costes reales entre coche eléctrico y de combustión basado en uso real.",
+  "requestFramePermissions": []
+}
