@@ -24,9 +24,6 @@
         .tooltip { position: relative; display: inline-block; }
         .tooltip .tooltiptext { visibility: hidden; width: 200px; background-color: #111827; color: #fff; text-align: center; border-radius: 8px; padding: 10px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -100px; opacity: 0; transition: opacity 0.3s; font-size: 11px; font-weight: normal; line-height: 1.4; }
         .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
-
-        /* Custom inputs */
-        .input-field { @apply w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all; }
     </style>
 </head>
 <body class="bg-[#F8F9FA] text-[#212529] min-h-screen">
@@ -35,6 +32,14 @@
     </div>
 
     <script>
+        // Imágenes constantes
+        const IMAGES = {
+            tesla: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&q=80&w=800',
+            bmw: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=800',
+            genericElectric: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&q=80&w=800',
+            genericCombustion: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=800'
+        };
+
         // Estado inicial de la aplicación
         const state = {
             annualKm: 15000,
@@ -43,27 +48,27 @@
             publicChargingPrice: 0.45,
             homeChargingPercent: 80,
             showCustomizer: false,
+            isCustomized: false,
             electricCar: {
-                name: 'Coche Eléctrico',
+                name: 'Tesla Model 3 (RWD)',
                 consumption: 15.5,
                 maintenance: 300,
-                image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&q=80&w=800',
-                logo: 'https://www.svgrepo.com/show/303235/tesla-motors-1-logo.svg'
+                image: IMAGES.tesla,
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg'
             },
             combustionCar: {
-                name: 'Coche de Combustión',
+                name: 'BMW 320i',
                 consumption: 7.2,
                 maintenance: 800,
-                image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=800',
-                logo: 'https://www.svgrepo.com/show/303247/bmw-logo.svg'
+                image: IMAGES.bmw,
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg'
             }
         };
 
         function formatNumber(num, decimals = 0) {
-            return num.toLocaleString('es-ES', {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals
-            });
+            const parts = num.toFixed(decimals).split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return parts.join(',');
         }
 
         function calculate() {
@@ -226,9 +231,10 @@
             return `
                 <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border transition-all duration-500 ${isCheaper ? 'ring-4 ring-emerald-500/20 border-emerald-500' : 'border-gray-100'}">
                     <div class="h-48 relative overflow-hidden">
-                        <img src="${car.image}" class="w-full h-full object-cover">
+                        <img src="${car.image}" class="w-full h-full object-cover" referrerPolicy="no-referrer">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                         <div class="absolute bottom-6 left-8 flex items-center gap-3">
+                            ${car.logo ? `<img src="${car.logo}" class="w-8 h-8 brightness-0 invert opacity-80" referrerPolicy="no-referrer">` : ''}
                             <h4 class="text-white font-black text-xl tracking-tight">${car.name}</h4>
                         </div>
                         ${isCheaper ? '<div class="absolute top-6 right-6 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Más Económico</div>' : ''}
@@ -301,7 +307,16 @@
             render();
         };
 
+
+
         window.updateCar = (carKey, field, val) => {
+            state.isCustomized = true;
+            // Cambiar a imágenes genéricas y quitar logos
+            state.electricCar.image = IMAGES.genericElectric;
+            state.combustionCar.image = IMAGES.genericCombustion;
+            state.electricCar.logo = null;
+            state.combustionCar.logo = null;
+            
             if (field === 'consumption' || field === 'maintenance') {
                 state[carKey][field] = parseFloat(val) || 0;
             } else {
