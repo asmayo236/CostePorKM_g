@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CostePorKm - Comparador Real de Costes</title>
+    <title>CostePorKm - El coste real de tus viajes</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -22,6 +24,9 @@
         .tooltip { position: relative; display: inline-block; }
         .tooltip .tooltiptext { visibility: hidden; width: 200px; background-color: #111827; color: #fff; text-align: center; border-radius: 8px; padding: 10px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -100px; opacity: 0; transition: opacity 0.3s; font-size: 11px; font-weight: normal; line-height: 1.4; }
         .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+
+        /* Custom inputs */
+        .input-field { @apply w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all; }
     </style>
 </head>
 <body class="bg-[#F8F9FA] text-[#212529] min-h-screen">
@@ -37,21 +42,29 @@
             electricityPrice: 0.20,
             publicChargingPrice: 0.45,
             homeChargingPercent: 80,
+            showCustomizer: false,
             electricCar: {
-                name: 'Tesla Model 3 (RWD)',
+                name: 'Coche Eléctrico',
                 consumption: 15.5,
                 maintenance: 300,
-                image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&q=80&w=800',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png'
+                image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&q=80&w=800',
+                logo: 'https://www.svgrepo.com/show/303235/tesla-motors-1-logo.svg'
             },
             combustionCar: {
-                name: 'BMW 320i',
+                name: 'Coche de Combustión',
                 consumption: 7.2,
                 maintenance: 800,
-                image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=800',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg'
+                image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=800',
+                logo: 'https://www.svgrepo.com/show/303247/bmw-logo.svg'
             }
         };
+
+        function formatNumber(num, decimals = 0) {
+            return num.toLocaleString('es-ES', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
 
         function calculate() {
             const effectiveElec = (state.electricityPrice * (state.homeChargingPercent / 100)) + (state.publicChargingPrice * ((100 - state.homeChargingPercent) / 100));
@@ -84,16 +97,7 @@
                             </div>
                             <div>
                                 <h1 class="text-3xl font-black text-gray-900 tracking-tighter leading-none">CostePorKm</h1>
-                                <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-1.5">El coste real de tu movilidad</p>
-                            </div>
-                        </div>
-                        <div class="hidden sm:block text-right">
-                            <div class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
-                                <span class="relative flex h-2 w-2">
-                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                </span>
-                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Cálculo en tiempo real</span>
+                                <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-1.5">El coste real de tus viajes</p>
                             </div>
                         </div>
                     </div>
@@ -110,13 +114,13 @@
                                 }
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-gray-900">El ${res.isElectricCheaper ? 'Eléctrico' : 'Combustión'} es más rentable</h3>
-                                <p class="text-gray-600">Ahorras <span class="font-bold text-gray-900">${Math.round(res.diffAnnual).toLocaleString()} €</span> al año</p>
+                                <h3 class="text-xl font-bold text-gray-900">El ${res.isElectricCheaper ? 'Eléctrico' : 'Combustión'} es más económico</h3>
+                                <p class="text-gray-600">Ahorras <span class="font-bold text-gray-900">${formatNumber(res.diffAnnual)} €</span> al año</p>
                             </div>
                         </div>
                         <div class="text-center sm:text-right">
                             <p class="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Ahorro proyectado a 5 años</p>
-                            <p class="text-4xl font-black ${res.isElectricCheaper ? 'text-emerald-600' : 'text-red-600'}">${Math.round(res.diff5).toLocaleString()} €</p>
+                            <p class="text-4xl font-black ${res.isElectricCheaper ? 'text-emerald-600' : 'text-red-600'}">${formatNumber(res.diff5)} €</p>
                         </div>
                     </div>
 
@@ -133,8 +137,8 @@
                             Comparativa de Gasto Anual Total
                         </h3>
                         <div class="space-y-6">
-                            ${renderBar('Eléctrico', res.eAnnual, Math.max(res.eAnnual, res.cAnnual), '#10b981')}
-                            ${renderBar('Combustión', res.cAnnual, Math.max(res.eAnnual, res.cAnnual), '#ef4444')}
+                            ${renderBar(state.electricCar.name, res.eAnnual, Math.max(res.eAnnual, res.cAnnual), '#10b981')}
+                            ${renderBar(state.combustionCar.name, res.cAnnual, Math.max(res.eAnnual, res.cAnnual), '#ef4444')}
                         </div>
                     </div>
 
@@ -148,18 +152,67 @@
                             ${renderSlider('Kilómetros anuales', 'annualKm', state.annualKm, 5000, 50000, 1000, 'km', '¿Cuánto conduces al año?')}
                             ${renderSlider('Precio Combustible (€/L)', 'fuelPrice', state.fuelPrice, 1, 2.5, 0.01, '€', 'Precio medio de la gasolina/diésel.', 'accent-red')}
                             ${renderSlider('Precio Luz Casa (€/kWh)', 'electricityPrice', state.electricityPrice, 0.05, 0.4, 0.01, '€', 'Tu tarifa doméstica media.')}
+                            ${renderSlider('Precio Carga Pública (€/kWh)', 'publicChargingPrice', state.publicChargingPrice, 0.1, 1.0, 0.01, '€', 'Precio medio en cargadores públicos.')}
                             ${renderSlider('% Carga en casa', 'homeChargingPercent', state.homeChargingPercent, 0, 100, 5, '%', 'Porcentaje de cargas hechas en casa.')}
                         </div>
                         
                         <div class="mt-12 pt-8 border-t border-gray-50 flex flex-col sm:flex-row items-center justify-between gap-6">
                             <div class="bg-emerald-50 px-6 py-4 rounded-2xl">
                                 <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Precio Luz Efectivo</p>
-                                <p class="text-2xl font-black text-emerald-700">${((state.electricityPrice * (state.homeChargingPercent / 100)) + (state.publicChargingPrice * ((100 - state.homeChargingPercent) / 100))).toFixed(3)} €/kWh</p>
+                                <p class="text-2xl font-black text-emerald-700">${formatNumber((state.electricityPrice * (state.homeChargingPercent / 100)) + (state.publicChargingPrice * ((100 - state.homeChargingPercent) / 100)), 3)} €/kWh</p>
                             </div>
-                            <button onclick="alert('Funcionalidad de edición completa disponible en la versión Pro')" class="px-8 py-4 bg-gray-900 text-white rounded-full font-bold hover:bg-gray-800 transition-all shadow-xl active:scale-95">
-                                Configurar mis propios coches
+                            <button onclick="toggleCustomizer()" class="px-8 py-4 bg-gray-900 text-white rounded-full font-bold hover:bg-gray-800 transition-all shadow-xl active:scale-95">
+                                ${state.showCustomizer ? 'Cerrar configuración' : 'Haz tu propia comparativa'}
                             </button>
                         </div>
+
+                        ${state.showCustomizer ? `
+                        <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12 p-8 bg-gray-50 rounded-[2rem] border border-gray-100 animate-in fade-in slide-in-from-top-4 duration-500">
+                            <!-- Config Eléctrico -->
+                            <div class="space-y-6">
+                                <h4 class="font-bold text-emerald-600 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2L3 14h9l-1 8 8-12h-9l1-8z"></path></svg>
+                                    Configuración Eléctrico
+                                </h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Nombre del vehículo</label>
+                                        <input type="text" value="${state.electricCar.name}" oninput="updateCar('electricCar', 'name', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Consumo (kWh/100km)</label>
+                                        <input type="number" value="${state.electricCar.consumption}" oninput="updateCar('electricCar', 'consumption', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Mantenimiento (€/año)</label>
+                                        <input type="number" value="${state.electricCar.maintenance}" oninput="updateCar('electricCar', 'maintenance', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Config Combustión -->
+                            <div class="space-y-6">
+                                <h4 class="font-bold text-red-600 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 16.9L15 13l-4 4-4-4-4 4"></path><path d="M12 3v18"></path></svg>
+                                    Configuración Combustión
+                                </h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Nombre del vehículo</label>
+                                        <input type="text" value="${state.combustionCar.name}" oninput="updateCar('combustionCar', 'name', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Consumo (L/100km)</label>
+                                        <input type="number" value="${state.combustionCar.consumption}" oninput="updateCar('combustionCar', 'consumption', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Mantenimiento (€/año)</label>
+                                        <input type="number" value="${state.combustionCar.maintenance}" oninput="updateCar('combustionCar', 'maintenance', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
                     </section>
                 </main>
 
@@ -176,31 +229,28 @@
                         <img src="${car.image}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                         <div class="absolute bottom-6 left-8 flex items-center gap-3">
-                            <div class="bg-white p-1.5 rounded-lg">
-                                <img src="${car.logo}" class="w-6 h-6 object-contain">
-                            </div>
                             <h4 class="text-white font-black text-xl tracking-tight">${car.name}</h4>
                         </div>
-                        ${isCheaper ? '<div class="absolute top-6 right-6 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Más Rentable</div>' : ''}
+                        ${isCheaper ? '<div class="absolute top-6 right-6 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Más Económico</div>' : ''}
                     </div>
                     <div class="p-8 space-y-6">
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Coste por 100 km</p>
-                            <p class="text-4xl font-black ${isCheaper ? 'text-emerald-600' : 'text-gray-900'}">${cost100.toFixed(2)} €</p>
+                            <p class="text-4xl font-black ${isCheaper ? 'text-emerald-600' : 'text-gray-900'}">${formatNumber(cost100, 2)} €</p>
                         </div>
                         <div class="space-y-3 pt-6 border-t border-gray-50">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-500">Consumo Real</span>
-                                <span class="font-bold">${car.consumption} ${isElectric ? 'kWh' : 'L'}/100km</span>
+                                <span class="font-bold">${formatNumber(car.consumption, 1)} ${isElectric ? 'kWh' : 'L'}/100km</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-500">Mantenimiento</span>
-                                <span class="font-bold">${car.maintenance} €/año</span>
+                                <span class="font-bold">${formatNumber(car.maintenance)} €/año</span>
                             </div>
                         </div>
                         <div class="p-5 rounded-2xl ${isCheaper ? 'bg-emerald-50' : 'bg-gray-50'} flex justify-between items-center">
                             <span class="text-xs font-bold text-gray-500 uppercase">Gasto Total Anual</span>
-                            <span class="text-2xl font-black ${isCheaper ? 'text-emerald-700' : 'text-gray-900'}">${Math.round(annual).toLocaleString()} €</span>
+                            <span class="text-2xl font-black ${isCheaper ? 'text-emerald-700' : 'text-gray-900'}">${formatNumber(annual)} €</span>
                         </div>
                     </div>
                 </div>
@@ -213,7 +263,7 @@
                 <div class="space-y-2">
                     <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-gray-500">
                         <span>${label}</span>
-                        <span>${Math.round(value).toLocaleString()} €/año</span>
+                        <span>${formatNumber(value)} €/año</span>
                     </div>
                     <div class="h-4 bg-gray-100 rounded-full overflow-hidden">
                         <div class="h-full rounded-full transition-all duration-1000" style="width: ${width}%; background-color: ${color}"></div>
@@ -233,7 +283,7 @@
                                 <span class="tooltiptext">${tooltip}</span>
                             </div>
                         </label>
-                        <span class="text-emerald-600 font-black text-lg">${value.toLocaleString()} ${unit}</span>
+                        <span class="text-emerald-600 font-black text-lg">${formatNumber(value, step < 1 ? 2 : 0)} ${unit}</span>
                     </div>
                     <input type="range" min="${min}" max="${max}" step="${step}" value="${value}" 
                         oninput="updateState('${key}', this.value)" class="w-full ${accentClass}">
@@ -243,6 +293,20 @@
 
         window.updateState = (key, val) => {
             state[key] = parseFloat(val);
+            render();
+        };
+
+        window.toggleCustomizer = () => {
+            state.showCustomizer = !state.showCustomizer;
+            render();
+        };
+
+        window.updateCar = (carKey, field, val) => {
+            if (field === 'consumption' || field === 'maintenance') {
+                state[carKey][field] = parseFloat(val) || 0;
+            } else {
+                state[carKey][field] = val;
+            }
             render();
         };
 
