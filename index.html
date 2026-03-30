@@ -90,6 +90,18 @@
         }
 
         function render() {
+            const activeElement = document.activeElement;
+            const activeId = activeElement ? activeElement.id : null;
+            let selectionStart = null;
+            let selectionEnd = null;
+
+            if (activeId && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                try {
+                    selectionStart = activeElement.selectionStart;
+                    selectionEnd = activeElement.selectionEnd;
+                } catch (e) {}
+            }
+
             const res = calculate();
             const app = document.getElementById('app');
             
@@ -182,15 +194,15 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Nombre del vehículo</label>
-                                        <input type="text" value="${state.electricCar.name}" oninput="updateCar('electricCar', 'name', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                                        <input type="text" id="electric-name" value="${state.electricCar.name}" oninput="updateCar('electricCar', 'name', this.value)" autocomplete="off" spellcheck="false" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
                                     </div>
                                     <div>
                                         <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Consumo (kWh/100km)</label>
-                                        <input type="number" value="${state.electricCar.consumption}" oninput="updateCar('electricCar', 'consumption', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                                        <input type="number" id="electric-consumption" value="${state.electricCar.consumption}" oninput="updateCar('electricCar', 'consumption', this.value)" autocomplete="off" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
                                     </div>
                                     <div>
                                         <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Mantenimiento (€/año)</label>
-                                        <input type="number" value="${state.electricCar.maintenance}" oninput="updateCar('electricCar', 'maintenance', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                                        <input type="number" id="electric-maintenance" value="${state.electricCar.maintenance}" oninput="updateCar('electricCar', 'maintenance', this.value)" autocomplete="off" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
                                     </div>
                                 </div>
                             </div>
@@ -204,15 +216,15 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Nombre del vehículo</label>
-                                        <input type="text" value="${state.combustionCar.name}" oninput="updateCar('combustionCar', 'name', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                                        <input type="text" id="combustion-name" value="${state.combustionCar.name}" oninput="updateCar('combustionCar', 'name', this.value)" autocomplete="off" spellcheck="false" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
                                     </div>
                                     <div>
                                         <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Consumo (L/100km)</label>
-                                        <input type="number" value="${state.combustionCar.consumption}" oninput="updateCar('combustionCar', 'consumption', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                                        <input type="number" id="combustion-consumption" value="${state.combustionCar.consumption}" oninput="updateCar('combustionCar', 'consumption', this.value)" autocomplete="off" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
                                     </div>
                                     <div>
                                         <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Mantenimiento (€/año)</label>
-                                        <input type="number" value="${state.combustionCar.maintenance}" oninput="updateCar('combustionCar', 'maintenance', this.value)" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                                        <input type="number" id="combustion-maintenance" value="${state.combustionCar.maintenance}" oninput="updateCar('combustionCar', 'maintenance', this.value)" autocomplete="off" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
                                     </div>
                                 </div>
                             </div>
@@ -225,6 +237,24 @@
                     <p>© 2026 CostePorKm - Datos basados en consumos reales medios. "Lo que realmente vas a pagar".</p>
                 </footer>
             `;
+
+            if (activeId) {
+                const restoreFocus = () => {
+                    const element = document.getElementById(activeId);
+                    if (element) {
+                        element.focus();
+                        if (selectionStart !== null && selectionEnd !== null) {
+                            try {
+                                element.setSelectionRange(selectionStart, selectionEnd);
+                            } catch (e) {}
+                        }
+                    }
+                };
+                
+                // Restaurar foco inmediatamente y también en el siguiente frame para asegurar persistencia
+                restoreFocus();
+                requestAnimationFrame(restoreFocus);
+            }
         }
 
         function renderCard(car, cost100, annual, isCheaper, isElectric) {
@@ -291,7 +321,7 @@
                         </label>
                         <span class="text-emerald-600 font-black text-lg">${formatNumber(value, step < 1 ? 2 : 0)} ${unit}</span>
                     </div>
-                    <input type="range" min="${min}" max="${max}" step="${step}" value="${value}" 
+                    <input type="range" id="slider-${key}" min="${min}" max="${max}" step="${step}" value="${value}" 
                         oninput="updateState('${key}', this.value)" class="w-full ${accentClass}">
                 </div>
             `;
