@@ -54,14 +54,14 @@
                 consumption: 15.5,
                 maintenance: 300,
                 image: IMAGES.tesla,
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg'
+                logo: 'https://cdn.simpleicons.org/tesla/white'
             },
             combustionCar: {
                 name: 'BMW 320i',
                 consumption: 7.2,
                 maintenance: 800,
                 image: IMAGES.bmw,
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg'
+                logo: 'https://cdn.simpleicons.org/bmw/white'
             }
         };
 
@@ -234,7 +234,7 @@
                         <img src="${car.image}" class="w-full h-full object-cover" referrerPolicy="no-referrer">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                         <div class="absolute bottom-6 left-8 flex items-center gap-3">
-                            ${car.logo ? `<img src="${car.logo}" class="w-8 h-8 brightness-0 invert opacity-80" referrerPolicy="no-referrer">` : ''}
+                            ${car.logo ? `<img src="${car.logo}" class="w-8 h-8 opacity-80" referrerPolicy="no-referrer">` : ''}
                             <h4 class="text-white font-black text-xl tracking-tight">${car.name}</h4>
                         </div>
                         ${isCheaper ? '<div class="absolute top-6 right-6 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Más Económico</div>' : ''}
